@@ -1,0 +1,15 @@
+pipeline:
+  SLACK NOTIFICATION:
+    image: diyfr/drone_plugin_teams
+    channel: Test-Gauntlet-Noti
+    webhook: "https://outlook.office.com/webhook/251c98b6-8dba-47e1-b929-44dd388aa531@30459df5-1e53-4d8b-a162-0ad2348546f1/IncomingWebhook/f4adee1fdfc742a3b8ad022691cf0ad3/cc233ef5-10b8-44f6-91f5-c3e77b5f6d35"
+    when:
+      status: [ success, failure ]
+      event: [push]
+      branch: master
+    template: >
+      {{#success build.status}}
+        :drone: {{repo.name}} {{build.message}} succeeded :green_apple:
+      {{else}}
+        :drone: {{repo.name}} {{build.message}} failed :apple: Fix me please! {{build.link}}
+      {{/success}}
