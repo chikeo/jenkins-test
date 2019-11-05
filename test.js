@@ -2,7 +2,7 @@ const expect = require('chai').expect;
 
 // Trigger Jenkins Job for Github PR
 // This is a test
-describe('TEST1', () => {
+describe('TEST', () => {
   it('passed', () => {
     expect(true).to.be.true;
   });
