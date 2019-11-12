@@ -20,7 +20,7 @@ pipeline:
     <<: *when-push
     image: *node-image
     commands:
-      - npm i
+      - npm ci
       - npm test
 
   notify-teams-about-push-or-tag-on-master:
@@ -68,4 +68,4 @@ pipeline:
       [ ${DRONE_BUILD_LINK} ]
     when:
       status: [ failure ]
-      event: [ deploy ]
+      event: [ deploy ] 
