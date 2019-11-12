@@ -4,7 +4,7 @@ const expect = require('chai').expect;
 // This is a test
 describe('TEST1', () => {
   it('passed', () => {
-    expect(true).to.be.true;
+    expect(false).to.be.true;
   });
 });
 
