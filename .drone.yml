@@ -1,15 +1,75 @@
-pipeline:
-  TEAM NOTIFICATION:
-    image: diyfr/drone_plugin_teams
-    channel: Test-Gauntlet-Noti
-    webhook: "https://outlook.office.com/webhook/251c98b6-8dba-47e1-b929-44dd388aa531@30459df5-1e53-4d8b-a162-0ad2348546f1/IncomingWebhook/f4adee1fdfc742a3b8ad022691cf0ad3/cc233ef5-10b8-44f6-91f5-c3e77b5f6d35"
+### This Drone file is being used with Drone v0.8, read documentation here:
+### https://0-8-0.docs.drone.io/
+aliases:
+  # Using node:10 image to avoid having to install extra software as a step
+  - &node-image node:10
+
+  # When conditions
+  - &when-push
     when:
-      status: [ success, failure ]
-      event: [push]
+      event: push
+  - &when-push-on-master
+    when:
+      event: push
       branch: master
-    template: >
-      {{#success build.status}}
-        :drone: {{repo.name}} {{build.message}} succeeded :green_apple:
-      {{else}}
-        :drone: {{repo.name}} {{build.message}} failed :apple: Fix me please! {{build.link}}
-      {{/success}}
+
+
+pipeline:
+  # Runs unit tests
+  unit-test:
+    <<: *when-push
+    image: *node-image
+    commands:
+      - npm ci
+      - . ./aws-credentials
+      - npm test
+    environment:
+      PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: "true"
+      ENV: dev
+
+  notify-teams-about-push-or-tag-on-master:
+    image: globx/drone-plugin-teams:linux-amd64-build-1
+    secrets: [ teams_webhook ]
+    message_title: >
+      [ ${DRONE_REPO_NAME} ]
+    message_failure: >
+      [ "${DRONE_BUILD_EVENT} failed" ]
+    link_text: >
+      [ ${DRONE_BUILD_LINK} ]
+    link_url: >
+      [ ${DRONE_BUILD_LINK} ]
+    when:
+      status: [ failure ]
+      branch: [ master ]
+      event: [ push, tag ]
+
+  notify-teams-about-tag-on-hotfix:
+    image: globx/drone-plugin-teams:linux-amd64-build-1
+    secrets: [ teams_webhook ]
+    message_title: >
+      [ ${DRONE_REPO_NAME} ]
+    message_failure: >
+      Tag failed
+    link_text: >
+      [ ${DRONE_BUILD_LINK} ]
+    link_url: >
+      [ ${DRONE_BUILD_LINK} ]
+    when:
+      status: [ failure ]
+      branch: [ hotfix/* ]
+      event: [ tag ]
+
+  notify-teams-about-deploy:
+    image: globx/drone-plugin-teams:linux-amd64-build-1
+    secrets: [ teams_webhook ]
+    message_title: >
+      [ ${DRONE_REPO_NAME} ]
+    message_failure: >
+      Deploy failed
+    link_text: >
+      [ ${DRONE_BUILD_LINK} ]
+    link_url: >
+      [ ${DRONE_BUILD_LINK} ]
+    when:
+      status: [ failure ]
+      event: [ deploy ]
