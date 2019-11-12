@@ -20,12 +20,8 @@ pipeline:
     <<: *when-push
     image: *node-image
     commands:
-      - npm ci
-      - . ./aws-credentials
+      - npm i
       - npm test
-    environment:
-      PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: "true"
-      ENV: dev
 
   notify-teams-about-push-or-tag-on-master:
     image: globx/drone-plugin-teams:linux-amd64-build-1
